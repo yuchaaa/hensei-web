@@ -8,6 +8,8 @@
 	import CharacterRep from '$lib/components/reps/CharacterRep.svelte'
 	import WeaponRep from '$lib/components/reps/WeaponRep.svelte'
 	import SummonRep from '$lib/components/reps/SummonRep.svelte'
+	import { sidebar } from '$lib/stores/sidebar.svelte'
+	import { getJobIconUrl } from '$lib/utils/jobUtils'
 	import * as m from '$lib/paraglide/messages'
 
 	interface Props {
@@ -25,6 +27,7 @@
 	const summons = $derived(party.summons)
 	const characters = $derived(party.characters)
 	const unlimited = $derived(party.raid?.group?.unlimited ?? false)
+	const jobIcon = $derived(party.job ? getJobIconUrl(party.job.granblueId) : undefined)
 
 	// Handle value changes
 	let value = $state(selectedTab)
@@ -35,6 +38,7 @@
 
 	function handleValueChange(newValue: string) {
 		value = newValue as GridType
+		sidebar.close()
 		onTabChange?.(newValue as GridType)
 	}
 
@@ -45,6 +49,7 @@
 		<RepSegment
 			value={GridType.Character}
 			label={m.party_segmented_control_characters()}
+			labelIcon={jobIcon}
 			selected={value === GridType.Character}
 		>
 			<CharacterRep characters={characters} {unlimited} />
