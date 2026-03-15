@@ -1,10 +1,12 @@
 <script lang="ts">
 	import * as m from '$lib/paraglide/messages'
 	import Dialog from './ui/Dialog.svelte'
+	import ModalHeader from './ui/ModalHeader.svelte'
 	import ModalBody from './ui/ModalBody.svelte'
 	import ModalFooter from './ui/ModalFooter.svelte'
 	import SettingsNav, { type ElementType } from './ui/SettingsNav.svelte'
 	import AccountSettings from './settings/AccountSettings.svelte'
+	import PasswordSettings from './settings/PasswordSettings.svelte'
 	import ProfileSettings from './settings/ProfileSettings.svelte'
 	import PrivacySettings from './settings/PrivacySettings.svelte'
 	import { users } from '$lib/api/resources/users'
@@ -34,6 +36,7 @@
 	// Form state - Account section (initialized empty, populated from API)
 	let formUsername = $state(username)
 	let formEmail = $state('')
+	let emailVerified = $state(false)
 	let currentPassword = $state('')
 	let newPassword = $state('')
 	let confirmPassword = $state('')
@@ -88,6 +91,7 @@
 			const data = currentUserQuery.data
 			// Account
 			formEmail = data.email ?? ''
+			emailVerified = data.emailVerified ?? false
 			// Profile
 			picture = data.avatar?.picture ?? ''
 			element = (data.avatar?.element as ElementType) ?? 'wind'
@@ -116,6 +120,7 @@
 	// Navigation items
 	const navItems = [
 		{ value: 'account', label: m.settings_nav_account() },
+		{ value: 'password', label: m.settings_nav_password() },
 		{ value: 'profile', label: m.settings_nav_profile() },
 		{ value: 'privacy', label: m.settings_nav_privacy() }
 	]
@@ -240,6 +245,9 @@
 
 <Dialog bind:open {...onOpenChange ? { onOpenChange } : {}} size="medium" hideClose>
 	{#snippet children()}
+		<ModalHeader title={m.settings_title()}>
+			<span class="header-username">@{username}</span>
+		</ModalHeader>
 		<ModalBody noPadding>
 			<div class="settings-layout">
 				{#if error}
@@ -247,10 +255,6 @@
 				{/if}
 
 				<aside class="settings-sidebar">
-					<div class="sidebar-header">
-						<h2 class="title">{m.settings_title()}</h2>
-						<p class="username">@{username}</p>
-					</div>
 					<SettingsNav bind:value={activeSection} {element} items={navItems} />
 				</aside>
 
@@ -264,18 +268,22 @@
 						<AccountSettings
 							username={formUsername}
 							email={formEmail}
-							{currentPassword}
-							{newPassword}
-							{confirmPassword}
+							{emailVerified}
 							{bahamut}
 							{role}
 							{element}
 							onUsernameChange={(v) => (formUsername = v)}
 							onEmailChange={(v) => (formEmail = v)}
+							onBahamutChange={(v) => (bahamut = v)}
+						/>
+					{:else if activeSection === 'password'}
+						<PasswordSettings
+							{currentPassword}
+							{newPassword}
+							{confirmPassword}
 							onCurrentPasswordChange={(v) => (currentPassword = v)}
 							onNewPasswordChange={(v) => (newPassword = v)}
 							onConfirmPasswordChange={(v) => (confirmPassword = v)}
-							onBahamutChange={(v) => (bahamut = v)}
 						/>
 					{:else if activeSection === 'profile'}
 						<ProfileSettings
@@ -328,6 +336,11 @@
 	@use '$src/themes/typography' as typography;
 	@use '$src/themes/layout' as layout;
 
+	.header-username {
+		font-size: typography.$font-small;
+		color: var(--text-secondary);
+	}
+
 	.settings-layout {
 		display: flex;
 		height: 500px;
@@ -349,31 +362,12 @@
 		padding-right: 0;
 		display: flex;
 		flex-direction: column;
-		gap: spacing.$unit-2x;
-	}
-
-	.sidebar-header {
-		padding: spacing.$unit spacing.$unit-2x;
-
-		.title {
-			font-size: typography.$font-large;
-			font-weight: typography.$medium;
-			color: var(--text-primary);
-			margin: 0;
-		}
-
-		.username {
-			font-size: typography.$font-small;
-			color: var(--text-secondary);
-			margin: 0;
-			margin-top: spacing.$unit-half;
-		}
 	}
 
 	.settings-content {
 		flex: 1;
 		overflow-y: auto;
-		padding: spacing.$unit-3x;
+		padding: 0 spacing.$unit-3x;
 	}
 
 	.loading-state {
