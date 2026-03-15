@@ -1457,5 +1457,15 @@
 	"crew_join_declining": "Declining...",
 	"crew_join_decline": "Decline",
 	"crew_join_joining": "Joining...",
-	"crew_join_accept": "Accept"
+	"crew_join_accept": "Accept",
+
+	"migrate_banner_text": "You have anonymous teams that can be linked to your account",
+	"migrate_banner_action": "Migrate teams",
+	"migrate_page_title": "Migrate Teams",
+	"migrate_page_description": "You can migrate your anonymous teams to your account. Once migrated, these teams will appear on your profile and you'll be able to edit them while logged in.",
+	"migrate_page_empty": "No anonymous teams found",
+	"migrate_page_empty_description": "You don't have any anonymous teams to migrate",
+	"migrate_page_button": "Migrate all teams",
+	"migrate_page_migrating": "Migrating...",
+	"migrate_page_success": "Teams migrated successfully"
 }
