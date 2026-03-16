@@ -538,7 +538,7 @@
 		position: absolute;
 		width: 100%;
 		height: 100%;
-		z-index: effects.$z-badge;
+		z-index: effects.$z-sticky;
 		pointer-events: none;
 
 		.orphaned-badge {
@@ -581,8 +581,11 @@
 	// Orphaned state
 	.unit.orphaned {
 		.frame {
-			opacity: 0.7;
 			border: 2px solid colors.$error;
+		}
+
+		.frame .image {
+			opacity: 0.7;
 		}
 
 		.name {
@@ -613,12 +616,13 @@
 		}
 
 		.skills {
-			bottom: 12%;
-			right: -3.5%;
+			bottom: 1%;
+			left: auto;
+			right: 2%;
 			justify-content: flex-end;
 
 			.skill {
-				width: 25%;
+				height: 25%;
 			}
 		}
 	}
