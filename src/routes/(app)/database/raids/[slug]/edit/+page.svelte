@@ -61,7 +61,8 @@
 		group_id: '',
 		enemy_id: undefined as number | undefined,
 		summon_id: undefined as number | undefined,
-		quest_id: undefined as number | undefined
+		quest_id: undefined as number | undefined,
+		extra: false
 	})
 
 	// Sync edit data when raid changes
@@ -77,7 +78,8 @@
 				group_id: raid.group?.id || '',
 				enemy_id: raid.enemyId,
 				summon_id: raid.summonId,
-				quest_id: raid.questId
+				quest_id: raid.questId,
+				extra: raid.extra ?? false
 			}
 		}
 	})
@@ -131,7 +133,8 @@
 				group_id: editData.group_id,
 				enemy_id: toNumberOrUndefined(editData.enemy_id),
 				summon_id: toNumberOrUndefined(editData.summon_id),
-				quest_id: toNumberOrUndefined(editData.quest_id)
+				quest_id: toNumberOrUndefined(editData.quest_id),
+				extra: editData.extra
 			})
 
 			// Invalidate queries
@@ -246,6 +249,13 @@
 					editable={true}
 					type="select"
 					options={groupOptions}
+				/>
+				<DetailItem
+					label="Extra"
+					sublabel="Raid appears in Extra section"
+					bind:value={editData.extra}
+					editable={true}
+					type="checkbox"
 				/>
 			</DetailsContainer>
 		</section>

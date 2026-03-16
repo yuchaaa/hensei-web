@@ -55,6 +55,7 @@ export interface CreateRaidInput {
   enemy_id?: number
   summon_id?: number
   quest_id?: number
+  extra?: boolean
 }
 
 export interface UpdateRaidInput {
@@ -68,6 +69,7 @@ export interface UpdateRaidInput {
   enemy_id?: number
   summon_id?: number
   quest_id?: number
+  extra?: boolean
 }
 
 // Input types for creating/updating raid groups
