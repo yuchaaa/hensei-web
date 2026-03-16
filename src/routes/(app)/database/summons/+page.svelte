@@ -8,6 +8,8 @@
 	import ElementCell from '$lib/components/database/cells/ElementCell.svelte'
 	import SummonUncapCell from '$lib/components/database/cells/SummonUncapCell.svelte'
 	import LastUpdatedCell from '$lib/components/database/cells/LastUpdatedCell.svelte'
+	import BooleanCell from '$lib/components/database/cells/BooleanCell.svelte'
+	import DateCell from '$lib/components/database/cells/DateCell.svelte'
 	import { getRarityLabel } from '$lib/utils/rarity'
 
 	// Column configuration for summons
@@ -21,7 +23,7 @@
 		{
 			id: 'name',
 			header: 'Name',
-			flexgrow: 1,
+			width: 180,
 			sort: true,
 			template: (nameObj: any) => {
 				// nameObj is the name property itself, not the full item
@@ -41,7 +43,7 @@
 		{
 			id: 'element',
 			header: 'Element',
-			width: 100,
+			width: 56,
 			sort: true,
 			cell: ElementCell
 		},
@@ -61,8 +63,74 @@
 			id: 'last_updated',
 			header: 'Last Updated',
 			width: 120,
+			flexgrow: 1,
 			sort: true,
 			cell: LastUpdatedCell
+		},
+		{
+			id: 'flb',
+			header: 'FLB',
+			width: 70,
+			hidden: true,
+			cell: BooleanCell,
+			getter: (row: any) => row.uncap?.flb
+		},
+		{
+			id: 'ulb',
+			header: 'ULB',
+			width: 70,
+			hidden: true,
+			cell: BooleanCell,
+			getter: (row: any) => row.uncap?.ulb
+		},
+		{
+			id: 'transcendence',
+			header: 'Transcendence',
+			width: 120,
+			hidden: true,
+			cell: BooleanCell,
+			getter: (row: any) => row.uncap?.transcendence
+		},
+		{
+			id: 'maxLevel',
+			header: 'Max Level',
+			width: 90,
+			hidden: true
+		},
+		{
+			id: 'limit',
+			header: 'Limit',
+			width: 70,
+			hidden: true,
+			cell: BooleanCell
+		},
+		{
+			id: 'releaseDate',
+			header: 'Release Date',
+			width: 110,
+			hidden: true,
+			cell: DateCell
+		},
+		{
+			id: 'flbDate',
+			header: 'FLB Date',
+			width: 110,
+			hidden: true,
+			cell: DateCell
+		},
+		{
+			id: 'ulbDate',
+			header: 'ULB Date',
+			width: 110,
+			hidden: true,
+			cell: DateCell
+		},
+		{
+			id: 'transcendenceDate',
+			header: 'Transcend Date',
+			width: 110,
+			hidden: true,
+			cell: DateCell
 		}
 	]
 </script>

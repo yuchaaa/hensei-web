@@ -16,6 +16,8 @@
 	import ProficiencyCell from '$lib/components/database/cells/ProficiencyCell.svelte'
 	import WeaponUncapCell from '$lib/components/database/cells/WeaponUncapCell.svelte'
 	import LastUpdatedCell from '$lib/components/database/cells/LastUpdatedCell.svelte'
+	import BooleanCell from '$lib/components/database/cells/BooleanCell.svelte'
+	import DateCell from '$lib/components/database/cells/DateCell.svelte'
 	import AwakeningModal from '$lib/features/database/weapons/AwakeningModal.svelte'
 	import { getRarityLabel } from '$lib/utils/rarity'
 	import { getBasePath } from '$lib/utils/images'
@@ -93,7 +95,7 @@
 		{
 			id: 'name',
 			header: 'Name',
-			flexgrow: 1,
+			width: 180,
 			sort: true,
 			template: (nameObj: any) => {
 				// nameObj is the name property itself, not the full item
@@ -113,14 +115,14 @@
 		{
 			id: 'element',
 			header: 'Element',
-			width: 100,
+			width: 56,
 			sort: true,
 			cell: ElementCell
 		},
 		{
 			id: 'proficiency',
-			header: 'Proficiency',
-			width: 100,
+			header: 'Prof.',
+			width: 56,
 			sort: true,
 			cell: ProficiencyCell
 		},
@@ -134,8 +136,126 @@
 			id: 'last_updated',
 			header: 'Last Updated',
 			width: 120,
+			flexgrow: 1,
 			sort: true,
 			cell: LastUpdatedCell
+		},
+		{
+			id: 'flb',
+			header: 'FLB',
+			width: 70,
+			hidden: true,
+			cell: BooleanCell,
+			getter: (row: any) => row.uncap?.flb
+		},
+		{
+			id: 'ulb',
+			header: 'ULB',
+			width: 70,
+			hidden: true,
+			cell: BooleanCell,
+			getter: (row: any) => row.uncap?.ulb
+		},
+		{
+			id: 'transcendence',
+			header: 'Transcendence',
+			width: 120,
+			hidden: true,
+			cell: BooleanCell,
+			getter: (row: any) => row.uncap?.transcendence
+		},
+		{
+			id: 'maxLevel',
+			header: 'Max Level',
+			width: 90,
+			hidden: true
+		},
+		{
+			id: 'maxSkillLevel',
+			header: 'Max Skill Lv',
+			width: 100,
+			hidden: true
+		},
+		{
+			id: 'maxAwakeningLevel',
+			header: 'Max Awaken Lv',
+			width: 110,
+			hidden: true
+		},
+		{
+			id: 'maxExorcismLevel',
+			header: 'Max Exorcism Lv',
+			width: 120,
+			hidden: true
+		},
+		{
+			id: 'ax',
+			header: 'AX',
+			width: 60,
+			hidden: true,
+			cell: BooleanCell
+		},
+		{
+			id: 'axType',
+			header: 'AX Type',
+			width: 80,
+			hidden: true
+		},
+		{
+			id: 'gacha',
+			header: 'Gacha',
+			width: 70,
+			hidden: true,
+			cell: BooleanCell
+		},
+		{
+			id: 'extra',
+			header: 'Extra',
+			width: 70,
+			hidden: true,
+			cell: BooleanCell,
+			yesClass: 'extra'
+		},
+		{
+			id: 'limit',
+			header: 'Limit',
+			width: 70,
+			hidden: true,
+			cell: BooleanCell
+		},
+		{
+			id: 'forgeOrder',
+			header: 'Forge Order',
+			width: 100,
+			hidden: true
+		},
+		{
+			id: 'releaseDate',
+			header: 'Release Date',
+			width: 110,
+			hidden: true,
+			cell: DateCell
+		},
+		{
+			id: 'flbDate',
+			header: 'FLB Date',
+			width: 110,
+			hidden: true,
+			cell: DateCell
+		},
+		{
+			id: 'ulbDate',
+			header: 'ULB Date',
+			width: 110,
+			hidden: true,
+			cell: DateCell
+		},
+		{
+			id: 'transcendenceDate',
+			header: 'Transcend Date',
+			width: 110,
+			hidden: true,
+			cell: DateCell
 		}
 	]
 </script>
