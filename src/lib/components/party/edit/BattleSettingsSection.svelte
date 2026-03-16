@@ -13,13 +13,14 @@
 
 	interface Props {
 		fullAuto?: boolean
+		solo?: boolean
 		autoGuard?: boolean
 		autoSummon?: boolean
 		chargeAttack?: boolean
 		/** Element for switch color theming */
 		element?: ElementType
 		onchange?: (
-			field: 'fullAuto' | 'autoGuard' | 'autoSummon' | 'chargeAttack',
+			field: 'fullAuto' | 'solo' | 'autoGuard' | 'autoSummon' | 'chargeAttack',
 			value: boolean
 		) => void
 		disabled?: boolean
@@ -27,6 +28,7 @@
 
 	let {
 		fullAuto = $bindable(false),
+		solo = $bindable(false),
 		autoGuard = $bindable(false),
 		autoSummon = $bindable(false),
 		chargeAttack = $bindable(true),
@@ -36,10 +38,11 @@
 	}: Props = $props()
 
 	function handleChange(
-		field: 'fullAuto' | 'autoGuard' | 'autoSummon' | 'chargeAttack',
+		field: 'fullAuto' | 'solo' | 'autoGuard' | 'autoSummon' | 'chargeAttack',
 		value: boolean
 	) {
 		if (field === 'fullAuto') fullAuto = value
+		else if (field === 'solo') solo = value
 		else if (field === 'autoGuard') autoGuard = value
 		else if (field === 'autoSummon') autoSummon = value
 		else chargeAttack = value
@@ -49,6 +52,18 @@
 </script>
 
 <DetailsSection title={m.section_battle_settings()}>
+	<DetailRow label={m.battle_solo()} noHover compact>
+		{#snippet children()}
+			<Switch
+				checked={solo}
+				size="small"
+				{element}
+				{disabled}
+				onCheckedChange={(v) => handleChange('solo', v)}
+			/>
+		{/snippet}
+	</DetailRow>
+
 	<DetailRow label={m.battle_charge_attack()} noHover compact>
 		{#snippet children()}
 			<Switch

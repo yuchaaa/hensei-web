@@ -41,6 +41,7 @@
 		menu?: Snippet
 		// Battle settings
 		fullAuto?: boolean
+		solo?: boolean
 		autoGuard?: boolean
 		autoSummon?: boolean
 		chargeAttack?: boolean
@@ -66,6 +67,7 @@
 		onOpenEdit,
 		menu,
 		fullAuto,
+		solo,
 		autoGuard,
 		autoSummon,
 		chargeAttack,
@@ -244,6 +246,11 @@
 	<!-- Battle settings & performance -->
 	<div class="battle-section">
 		<div class="settings-tokens">
+			{#if solo}
+				<Tooltip content={m.battle_solo()}>
+					<span class="token solo on">{m.battle_solo()}</span>
+				</Tooltip>
+			{/if}
 			{#each settings as setting (setting.key)}
 				<Tooltip content={setting.tooltip}>
 					<span class="token {setting.key}" class:on={setting.active} class:off={!setting.active}>
@@ -506,7 +513,8 @@
 		}
 
 		&.fullAuto.on,
-		&.autoSummon.on {
+		&.autoSummon.on,
+		&.solo.on {
 			background: var(--full-auto-bg);
 			color: var(--full-auto-text);
 		}
