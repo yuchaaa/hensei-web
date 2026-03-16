@@ -41,6 +41,7 @@
 	} from '$lib/utils/external-links'
 	import Button from '$lib/components/ui/Button.svelte'
 	import DatabasePageHeader from '$lib/components/database/DatabasePageHeader.svelte'
+	import NotFoundPlaceholder from '$lib/components/database/NotFoundPlaceholder.svelte'
 	import { getListUrl } from '$lib/utils/listNavigation'
 
 	// Types
@@ -271,7 +272,10 @@
 <PageMeta title={pageTitle} description={m.page_desc_home()} />
 
 <div class="page">
-	<DatabasePageHeader title="Weapon" backHref={getListUrl('weapons')}>
+	<DatabasePageHeader title="Weapon">
+		{#snippet leftAction()}
+			<Button variant="ghost" size="small" leftIcon="chevron-left" href={getListUrl('weapons')}>Back</Button>
+		{/snippet}
 		{#snippet rightAction()}
 			{#if canEdit && editUrl}
 				<Button variant="element-ghost" element={elementName} size="small" href={editUrl}>Edit</Button>
@@ -448,15 +452,17 @@
 			{/if}
 		</DetailScaffold>
 	{:else}
-		<div class="not-found">
-			<h2>Weapon Not Found</h2>
-			<p>The weapon you're looking for could not be found.</p>
-			<button onclick={() => goto('/database/weapons')}>Back to Weapons</button>
-		</div>
+		<NotFoundPlaceholder
+			title="Weapon Not Found"
+			message="The weapon you're looking for could not be found."
+			backHref="/database/weapons"
+			backLabel="Back to Weapons"
+		/>
 	{/if}
 </div>
 
 <style lang="scss">
+	@use '$src/themes/database' as database;
 	@use '$src/themes/layout' as layout;
 	@use '$src/themes/spacing' as spacing;
 	@use '$src/themes/typography' as typography;
@@ -467,28 +473,8 @@
 		box-shadow: var(--shadow-sm);
 	}
 
-	.not-found {
-		text-align: center;
-		padding: spacing.$unit * 4;
-
-		button {
-			background: #007bff;
-			color: white;
-			border: none;
-			padding: spacing.$unit-half spacing.$unit;
-			border-radius: layout.$item-corner-small;
-			cursor: pointer;
-			margin-top: spacing.$unit;
-
-			&:hover {
-				background: #0056b3;
-			}
-		}
-	}
-
 	.details {
-		display: flex;
-		flex-direction: column;
+		@include database.details;
 	}
 
 	.weapon-skills {

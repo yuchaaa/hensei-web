@@ -83,7 +83,10 @@
 <PageMeta title="New Weapon Series" description={m.page_desc_home()} />
 
 <div class="page">
-	<DatabasePageHeader title="New Weapon Series" backHref="/database/weapons?view=series">
+	<DatabasePageHeader title="New Weapon Series">
+		{#snippet leftAction()}
+			<Button variant="ghost" size="small" leftIcon="chevron-left" href="/database/weapons?view=series">Back</Button>
+		{/snippet}
 		{#snippet rightAction()}
 			<Button variant="ghost" size="small" onclick={createSeries} disabled={isSaving}>
 				{isSaving ? 'Creating...' : 'Create'}
@@ -182,10 +185,8 @@
 </div>
 
 <style lang="scss">
-	@use '$src/themes/colors' as colors;
+	@use '$src/themes/database' as database;
 	@use '$src/themes/layout' as layout;
-	@use '$src/themes/spacing' as spacing;
-	@use '$src/themes/typography' as typography;
 
 	.page {
 		background: var(--card-bg);
@@ -194,16 +195,10 @@
 	}
 
 	.content {
-		display: flex;
-		flex-direction: column;
+		@include database.details;
 	}
 
 	.error-banner {
-		background: #fef2f2;
-		border: 1px solid #fecaca;
-		color: #dc2626;
-		padding: spacing.$unit-2x;
-		margin: spacing.$unit-2x;
-		border-radius: layout.$item-corner;
+		@include database.error-banner;
 	}
 </style>

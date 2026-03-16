@@ -1,8 +1,5 @@
 
 <script lang="ts">
-	// SvelteKit imports
-	import { goto } from '$app/navigation'
-
 	// Page metadata
 	import PageMeta from '$lib/components/PageMeta.svelte'
 	import * as m from '$lib/paraglide/messages'
@@ -17,11 +14,13 @@
 	import DetailsContainer from '$lib/components/ui/DetailsContainer.svelte'
 	import DetailItem from '$lib/components/ui/DetailItem.svelte'
 	import DatabasePageHeader from '$lib/components/database/DatabasePageHeader.svelte'
+	import DetailEntityHeader from '$lib/components/database/DetailEntityHeader.svelte'
+	import NotFoundPlaceholder from '$lib/components/database/NotFoundPlaceholder.svelte'
+	import AssociatedEntityLink from '$lib/components/database/AssociatedEntityLink.svelte'
 
 	// Utils
 	import { getAccessoryTypeName } from '$lib/utils/jobAccessoryUtils'
 	import { getJobAccessoryImageUrl } from '$lib/utils/jobAccessoryUtils'
-	import { getJobIconUrl } from '$lib/utils/jobUtils'
 	import { localizedName } from '$lib/utils/locale'
 	import { localizeHref } from '$lib/paraglide/runtime'
 	import { getRarityLabel } from '$lib/utils/rarity'
@@ -66,7 +65,10 @@
 <PageMeta title={pageTitle} description={m.page_desc_home()} />
 
 <div class="page">
-	<DatabasePageHeader title="Job Accessory" backHref="/database/jobs?view=accessories">
+	<DatabasePageHeader title="Job Accessory">
+		{#snippet leftAction()}
+			<Button variant="ghost" size="small" leftIcon="chevron-left" href="/database/jobs?view=accessories">Back</Button>
+		{/snippet}
 		{#snippet rightAction()}
 			{#if canEdit && editUrl}
 				<Button variant="secondary" size="small" href={editUrl}>Edit</Button>
@@ -76,28 +78,17 @@
 
 	{#if accessory}
 		<div class="content">
-			<header class="detail-header">
-				<div class="detail-header-left">
-					<div class="accessory-image">
-						<img
-							src={getJobAccessoryImageUrl(accessory.granblueId)}
-							alt={displayName}
-						/>
-					</div>
-					<div class="detail-header-info">
-						<h2>{displayName}</h2>
-						<div class="meta">
-							<span
-								class="type-badge"
-								class:shield={accessory.accessoryType === 1}
-								class:manatura={accessory.accessoryType === 2}
-							>
-								{getAccessoryTypeName(accessory.accessoryType)}
-							</span>
-						</div>
-					</div>
-				</div>
-			</header>
+			<DetailEntityHeader imageUrl={getJobAccessoryImageUrl(accessory.granblueId)} name={displayName} imageSize={96}>
+				{#snippet meta()}
+					<span
+						class="type-badge"
+						class:shield={accessory.accessoryType === 1}
+						class:manatura={accessory.accessoryType === 2}
+					>
+						{getAccessoryTypeName(accessory.accessoryType)}
+					</span>
+				{/snippet}
+			</DetailEntityHeader>
 
 			<section class="details">
 				<DetailsContainer title="Metadata">
@@ -123,14 +114,7 @@
 				<DetailsContainer title="Associated Job">
 					<DetailItem label="Job">
 						{#if accessory.job}
-							<a href={localizeHref(`/database/jobs/${accessory.job.granblueId}`)} class="job-link">
-								<img
-									src={getJobIconUrl(accessory.job.granblueId)}
-									alt=""
-									class="job-link-icon"
-								/>
-								{localizedName(accessory.job.name)}
-							</a>
+							<AssociatedEntityLink type="job" entity={accessory.job} />
 						{:else}
 							<span class="empty-value">—</span>
 						{/if}
@@ -141,13 +125,12 @@
 	{:else if accessoryQuery.isLoading}
 		<div class="loading">Loading accessory...</div>
 	{:else}
-		<div class="not-found">
-			<h2>Accessory Not Found</h2>
-			<p>The accessory you're looking for could not be found.</p>
-			<Button variant="secondary" size="small" href={localizeHref('/database/jobs?view=accessories')}>
-				Back to Accessories
-			</Button>
-		</div>
+		<NotFoundPlaceholder
+			title="Accessory Not Found"
+			message="The accessory you're looking for could not be found."
+			backHref={localizeHref('/database/jobs?view=accessories')}
+			backLabel="Back to Accessories"
+		/>
 	{/if}
 </div>
 
@@ -155,6 +138,7 @@
 	@use '$src/themes/layout' as layout;
 	@use '$src/themes/spacing' as spacing;
 	@use '$src/themes/typography' as typography;
+	@use '$src/themes/database' as database;
 
 	.page {
 		background: var(--card-bg);
@@ -167,51 +151,8 @@
 		position: relative;
 	}
 
-	.detail-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: spacing.$unit-2x;
-		padding: 0 spacing.$unit-2x spacing.$unit-2x;
-	}
-
-	.detail-header-left {
-		display: flex;
-		align-items: center;
-		gap: spacing.$unit-2x;
-	}
-
-	.accessory-image {
-		flex-shrink: 0;
-
-		img {
-			width: 96px;
-			height: auto;
-			border-radius: layout.$item-corner;
-		}
-	}
-
-	.detail-header-info {
-		flex: 1;
-
-		h2 {
-			font-size: typography.$font-xlarge;
-			font-weight: typography.$bold;
-			margin: 0 0 spacing.$unit 0;
-			color: var(--text-primary);
-		}
-
-		.meta {
-			display: flex;
-			flex-direction: row;
-			gap: spacing.$unit;
-			align-items: center;
-		}
-	}
-
 	.details {
-		display: flex;
-		flex-direction: column;
+		@include database.details;
 	}
 
 	.type-badge {
@@ -232,46 +173,13 @@
 		}
 	}
 
-	.job-link {
-		display: flex;
-		align-items: center;
-		gap: spacing.$unit-half;
-		padding: spacing.$unit-half;
-		border-radius: layout.$item-corner;
-		color: var(--blue);
-		text-decoration: none;
-		transition: background-color 0.15s ease;
-
-		&:hover {
-			background: var(--button-contained-bg-hover);
-		}
-	}
-
-	.job-link-icon {
-		width: auto;
-		height: 24px;
-		object-fit: contain;
-		border-radius: layout.$item-corner-small;
-	}
-
 	.empty-value {
 		color: var(--text-secondary);
 	}
 
-	.loading,
-	.not-found {
+	.loading {
 		text-align: center;
 		padding: spacing.$unit * 4;
 		color: var(--text-secondary);
-	}
-
-	@media (max-width: 768px) {
-		.detail-header {
-			flex-direction: column;
-		}
-
-		.accessory-image img {
-			width: 64px;
-		}
 	}
 </style>
