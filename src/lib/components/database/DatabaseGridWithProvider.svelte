@@ -221,9 +221,6 @@
 		const { data: dataStore } = api.getStores()
 		gridDataStore = dataStore
 
-		// Restore saved column visibility
-		restoreColumnVisibility()
-
 		// Persist column visibility on toggle
 		api.on('hide-column', () => {
 			saveColumnVisibility()
@@ -301,6 +298,7 @@
 
 	onMount(() => {
 		expanded = localStorage.getItem(EXPAND_STORAGE_KEY) === 'true'
+		restoreColumnVisibility()
 
 		if (resource !== 'weapons') {
 			initializeFromUrl()
