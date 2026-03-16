@@ -3,7 +3,7 @@
 	import DetailsContainer from '$lib/components/ui/DetailsContainer.svelte'
 	import DetailItem from '$lib/components/ui/DetailItem.svelte'
 	import WeaponTypeahead from '$lib/components/ui/WeaponTypeahead.svelte'
-	import { getWeaponGridImage } from '$lib/utils/images'
+	import { getWeaponImage } from '$lib/utils/images'
 	import { getElementKey } from '$lib/utils/element'
 	import { localizeHref } from '$lib/paraglide/runtime'
 
@@ -54,23 +54,21 @@
 				<DetailItem label="Forge Chain">
 					<div class="forge-chain">
 						{#each forgeChain as chainWeapon, index}
-							<div class="chain-step">
-								{#if index > 0}
-									<span class="chain-arrow">↓</span>
-								{/if}
-								<a
-									href={localizeHref(`/database/weapons/${chainWeapon.granblueId}`)}
-									class="chain-item {elementKey}"
-									class:current={chainWeapon.granblueId === weapon.granblueId}
-								>
-									<img
-										src={getWeaponGridImage(chainWeapon.granblueId, weapon.element)}
-										alt=""
-										class="chain-image"
-									/>
-									<span class="chain-name">{chainWeapon.name?.en || chainWeapon.name?.ja}</span>
-								</a>
-							</div>
+							{#if index > 0}
+								<span class="chain-arrow">↓</span>
+							{/if}
+							<a
+								href={localizeHref(`/database/weapons/${chainWeapon.granblueId}`)}
+								class="chain-item {elementKey}"
+								class:current={chainWeapon.granblueId === weapon.granblueId}
+							>
+								<img
+									src={getWeaponImage(chainWeapon.granblueId, 'square', weapon.element)}
+									alt=""
+									class="chain-image"
+								/>
+								<span class="chain-name">{chainWeapon.name?.en || chainWeapon.name?.ja}</span>
+							</a>
 						{/each}
 					</div>
 				</DetailItem>
@@ -99,13 +97,8 @@
 	.forge-chain {
 		display: flex;
 		flex-direction: column;
-		gap: 0;
-	}
-
-	.chain-step {
-		display: flex;
-		flex-direction: column;
 		align-items: flex-start;
+		gap: spacing.$unit-half;
 	}
 
 	.chain-item {
@@ -125,40 +118,34 @@
 
 		&.current {
 			&.wind {
-				background: var(--wind-nav-selected-bg);
-				outline: 1px solid var(--wind-button-bg);
+				background: var(--wind-nav-hover-bg);
 			}
 			&.fire {
-				background: var(--fire-nav-selected-bg);
-				outline: 1px solid var(--fire-button-bg);
+				background: var(--fire-nav-hover-bg);
 			}
 			&.water {
-				background: var(--water-nav-selected-bg);
-				outline: 1px solid var(--water-button-bg);
+				background: var(--water-nav-hover-bg);
 			}
 			&.earth {
-				background: var(--earth-nav-selected-bg);
-				outline: 1px solid var(--earth-button-bg);
+				background: var(--earth-nav-hover-bg);
 			}
 			&.light {
-				background: var(--light-nav-selected-bg);
-				outline: 1px solid var(--light-button-bg);
+				background: var(--light-nav-hover-bg);
 			}
 			&.dark {
-				background: var(--dark-nav-selected-bg);
-				outline: 1px solid var(--dark-button-bg);
+				background: var(--dark-nav-hover-bg);
 			}
 			&.null {
 				background: var(--card-bg-hover);
-				outline: 1px solid var(--text-tertiary);
 			}
 		}
 	}
 
 	.chain-image {
-		width: 24px;
-		height: 24px;
+		width: 32px;
+		height: 32px;
 		object-fit: contain;
+		border-radius: layout.$item-corner-small;
 	}
 
 	.chain-name {
@@ -168,7 +155,6 @@
 	.chain-arrow {
 		color: var(--text-tertiary);
 		font-size: typography.$font-small;
-		padding-left: spacing.$unit;
 		line-height: 1;
 	}
 
