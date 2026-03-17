@@ -6,10 +6,12 @@
 	import { ContextMenu } from 'bits-ui'
 	import { goto } from '$app/navigation'
 	import GridRep from '$lib/components/reps/GridRep.svelte'
+	import ExploreFilters, { type FilterItem } from '$lib/components/explore/ExploreFilters.svelte'
 	import ProfileHeader from '$lib/components/profile/ProfileHeader.svelte'
 	import MigrateBanner from '$lib/components/profile/MigrateBanner.svelte'
 	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte'
-	import { userQueries } from '$lib/api/queries/user.queries'
+	import { partyQueries } from '$lib/api/queries/party.queries'
+	import { filterItemsToParams } from '$lib/utils/filterConversion'
 	import { useDeleteParty } from '$lib/api/mutations/party.mutations'
 	import { page } from '$app/stores'
 	import { crewStore } from '$lib/stores/crew.store.svelte'
@@ -27,12 +29,22 @@
 	const viewerCrewRole = $derived(crewStore.membership?.role ?? null)
 	const viewerCrewId = $derived(crewStore.crew?.id ?? null)
 
+	// Filter state
+	let filterItems = $state<FilterItem[]>([])
+
+	// Convert pill filters to API params
+	const filterParams = $derived(filterItemsToParams(filterItems))
+
+	const hasActiveFilters = $derived(filterItems.length > 0)
+
 	let sentinelEl = $state<HTMLElement>()
 
 	const partiesQuery = createInfiniteQuery(() => ({
-		...userQueries.parties(data.user?.username ?? ''),
+		...partyQueries.userParties(data.user?.username ?? '', {
+			filters: filterParams
+		}),
 		enabled: !!data.user?.username,
-		initialData: data.items
+		initialData: !hasActiveFilters && data.items
 			? {
 					pages: [
 						{
@@ -52,15 +64,24 @@
 	// State-gated infinite scroll
 	const loader = useInfiniteLoader(() => partiesQuery, () => sentinelEl, { rootMargin: '300px' })
 
+	// Reset loader when filters change
+	$effect(() => {
+		void filterParams
+		loader.reset()
+	})
+
 	// Cleanup on destroy
 	onDestroy(() => loader.destroy())
 
-	const items = $derived(() => {
-		if (!partiesQuery.data?.pages) return data.items || []
-		return partiesQuery.data.pages.flatMap((page) => page.results ?? [])
-	})
+	const items = $derived(
+		partiesQuery.data?.pages.flatMap((page) => page.results) ?? data.items ?? []
+	)
 
-	const isEmpty = $derived(!partiesQuery.isLoading && items().length === 0)
+	const isEmpty = $derived(!partiesQuery.isLoading && items.length === 0)
+
+	function handleFiltersChange(newFilters: FilterItem[]) {
+		filterItems = newFilters
+	}
 
 	// Delete team
 	const deleteParty = useDeleteParty()
@@ -109,6 +130,8 @@
 		<MigrateBanner element={data.user?.avatar?.element} />
 	{/if}
 
+	<ExploreFilters bind:filters={filterItems} onFiltersChange={handleFiltersChange} />
+
 	{#if partiesQuery.isLoading}
 		<div class="loading">
 			<Icon name="loader-2" size={32} />
@@ -127,7 +150,7 @@
 	{:else}
 		<div class="profile-grid">
 			<ul class="grid" role="list">
-				{#each items() as party (party.id)}
+				{#each items as party (party.id)}
 					<li>
 						{#if isOwner}
 							<ContextMenu.Root>
@@ -176,7 +199,7 @@
 				</div>
 			{/if}
 
-			{#if !partiesQuery.hasNextPage && items().length > 0}
+			{#if !partiesQuery.hasNextPage && items.length > 0}
 				<div class="end">
 					<p>{m.profile_seen_all()}</p>
 				</div>
