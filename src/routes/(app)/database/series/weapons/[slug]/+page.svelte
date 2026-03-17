@@ -1,6 +1,5 @@
 
 <script lang="ts">
-	import { goto } from '$app/navigation'
 	import { createQuery } from '@tanstack/svelte-query'
 	import { entityQueries } from '$lib/api/queries/entity.queries'
 	import { withInitialData } from '$lib/query/ssr'
@@ -11,6 +10,7 @@
 	import DetailItem from '$lib/components/ui/DetailItem.svelte'
 	import Button from '$lib/components/ui/Button.svelte'
 	import NotFoundPlaceholder from '$lib/components/database/NotFoundPlaceholder.svelte'
+	import VariantRow from '$lib/features/database/weapons/VariantRow.svelte'
 	import { getAugmentTypeLabel } from '$lib/utils/augmentType'
 	import { localizedName } from '$lib/utils/locale'
 	import type { PageData } from './$types'
@@ -26,8 +26,10 @@
 	const userRole = $derived(data.role || 0)
 	const canEdit = $derived(userRole >= 7)
 	const editUrl = $derived(series?.slug ? `/database/series/weapons/${series.slug}/edit` : undefined)
+	const variants = $derived(series?.variants ?? [])
 
 	const pageTitle = $derived(series?.name ? `${localizedName(series.name)} Series` : 'Weapon Series')
+
 </script>
 
 <PageMeta title={pageTitle} description={m.page_desc_home()} />
@@ -61,6 +63,16 @@
 				<DetailItem label="Augment Type" value={getAugmentTypeLabel(series.augmentType)} />
 			</DetailsContainer>
 
+			<DetailsContainer title="Variants">
+				{#if variants.length > 0}
+					{#each variants as variant (variant.id)}
+						<VariantRow {variant} />
+					{/each}
+				{:else}
+					<p class="no-variants">No variants</p>
+				{/if}
+			</DetailsContainer>
+
 			{#if series.weaponCount !== undefined}
 				<DetailsContainer title="Statistics">
 					<DetailItem label="Weapon Count" value={series.weaponCount} />
@@ -80,6 +92,7 @@
 <style lang="scss">
 	@use '$src/themes/database' as database;
 	@use '$src/themes/layout' as layout;
+	@use '$src/themes/spacing' as spacing;
 
 	.page {
 		background: var(--card-bg);
@@ -89,5 +102,12 @@
 
 	.content {
 		@include database.details;
+	}
+
+	.no-variants {
+		color: var(--text-secondary);
+		text-align: center;
+		margin: 0;
+		padding-bottom: spacing.$unit-2x;
 	}
 </style>

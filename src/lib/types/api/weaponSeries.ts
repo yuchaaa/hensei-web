@@ -8,6 +8,7 @@
  */
 
 import type { AugmentType } from './weaponStatModifier'
+import type { WeaponSeriesVariant } from './weaponSeriesVariant'
 
 /**
  * Embedded series reference on weapons.
@@ -26,6 +27,10 @@ export interface WeaponSeriesRef {
 	elementChangeable: boolean
 	/** Number of weapon key slots this series supports (null if no keys) */
 	numWeaponKeys: number | null
+	/** Variant ID if this weapon has a variant override */
+	weaponSeriesVariantId?: string | null
+	/** Variant name if this weapon has a variant override */
+	weaponSeriesVariantName?: string | null
 }
 
 /**
@@ -48,6 +53,7 @@ export interface WeaponSeries {
 	numWeaponKeys: number | null
 	// Only included in :full view (show endpoint)
 	weaponCount?: number
+	variants?: WeaponSeriesVariant[]
 }
 
 /**
