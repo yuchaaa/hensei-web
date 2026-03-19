@@ -1,15 +1,13 @@
 <script lang="ts">
 	import * as m from '$lib/paraglide/messages'
 	import { getElementColor, getElementOptions } from '$lib/utils/element'
-	import { CHARACTER_SEASON_NAMES, CHARACTER_SERIES_NAMES } from '$lib/types/enums'
+	import { CHARACTER_SEASON_NAMES } from '$lib/types/enums'
 	import { RACE_LABELS } from '$lib/utils/race'
 	import { GENDER_LABELS } from '$lib/utils/gender'
 	import type { CollectionSortKey } from '$lib/types/api/collection'
-	import type { ViewMode } from '$lib/stores/viewMode.svelte'
 	import Button from '$lib/components/ui/Button.svelte'
 	import MultiSelect from '$lib/components/ui/MultiSelect.svelte'
 	import Select from '$lib/components/ui/Select.svelte'
-	import ViewModeToggle from '$lib/components/ui/ViewModeToggle.svelte'
 	import { createQuery, queryOptions } from '@tanstack/svelte-query'
 	import { entityAdapter } from '$lib/api/adapters/entity.adapter'
 	import { localizedName } from '$lib/utils/locale'
@@ -44,16 +42,8 @@
 		}
 		/** Whether to show the sort dropdown */
 		showSort?: boolean
-		/** Current view mode */
-		viewMode?: ViewMode
-		/** Callback when view mode changes */
-		onViewModeChange?: (mode: ViewMode) => void
-		/** Whether to show the view toggle */
-		showViewToggle?: boolean
 		/** Element color theme for active toggle state */
 		element?: string
-		/** Use neutral gray styling for view toggle */
-		neutralViewToggle?: boolean
 		/** Whether to show contained background styling (default: true) */
 		contained?: boolean
 		/** Whether to show the search input (default: true) */
@@ -118,11 +108,7 @@
 		onSortChange,
 		showFilters,
 		showSort = true,
-		viewMode = 'grid',
-		onViewModeChange,
-		showViewToggle = false,
 		element,
-		neutralViewToggle = false,
 		contained = true,
 		showSearch = true,
 		searchQuery = $bindable('')
@@ -180,6 +166,17 @@
 		})
 	)
 
+	// Fetch character series from API (only when entityType is character)
+	const characterSeriesQuery = createQuery(() =>
+		queryOptions({
+			queryKey: ['characterSeries', 'list'] as const,
+			queryFn: () => entityAdapter.getCharacterSeriesList(),
+			enabled: entityType === 'character',
+			staleTime: 1000 * 60 * 60,
+			gcTime: 1000 * 60 * 60 * 24
+		})
+	)
+
 	// Fetch summon series from API (only when entityType is summon)
 	const summonSeriesQuery = createQuery(() =>
 		queryOptions({
@@ -197,16 +194,17 @@
 		label
 	}))
 
-	// Character series (hardcoded enum)
-	const characterSeries = Object.entries(CHARACTER_SERIES_NAMES).map(([value, label]) => ({
-		value: Number(value),
-		label
-	}))
-
 	// Build series options based on entity type
-	// For weapons/summons: use API-fetched series with string IDs
-	// For characters: use hardcoded enum with number values
+	// All entity types use API-fetched series with string (UUID) IDs
 	const seriesOptions = $derived.by(() => {
+		if (entityType === 'character' && characterSeriesQuery.data) {
+			return characterSeriesQuery.data
+				.sort((a, b) => a.order - b.order)
+				.map((s) => ({
+					value: s.id,
+					label: localizedName(s.name)
+				}))
+		}
 		if (entityType === 'weapon' && weaponSeriesQuery.data) {
 			return weaponSeriesQuery.data
 				.sort((a, b) => a.order - b.order)
@@ -223,7 +221,7 @@
 					label: localizedName(s.name)
 				}))
 		}
-		return characterSeries
+		return []
 	})
 
 	const races = Object.entries(RACE_LABELS)
@@ -303,6 +301,7 @@
 		proficiencyFilters = []
 		genderFilters = []
 		searchQuery = ''
+		searchExpanded = false
 		emitChange()
 	}
 
@@ -316,6 +315,27 @@
 			genderFilters.length > 0 ||
 			searchQuery.length > 0
 	)
+
+	// Search expansion state
+	let searchExpanded = $state(false)
+	let searchInputEl = $state<HTMLInputElement>()
+
+	function expandSearch() {
+		searchExpanded = true
+	}
+
+	function collapseSearch() {
+		if (searchQuery.length === 0) {
+			searchExpanded = false
+		}
+	}
+
+	// Auto-focus when expanded
+	$effect(() => {
+		if (searchExpanded && searchInputEl) {
+			searchInputEl.focus()
+		}
+	})
 
 	// Overflow detection state
 	type FilterKey = 'element' | 'rarity' | 'season' | 'series' | 'race' | 'proficiency' | 'gender'
@@ -409,12 +429,19 @@
 <div class="filters-container" class:contained style:--accent-color={element ? `var(--${element}-button-bg)` : undefined}>
 	<div class="filters">
 		{#if showSearch}
-			<input
-				type="text"
-				class="search-input"
-				placeholder={m.placeholder_search()}
-				bind:value={searchQuery}
-			/>
+			{#if searchExpanded}
+				<input
+					type="text"
+					class="search-input"
+					placeholder={m.placeholder_search()}
+					bind:value={searchQuery}
+					bind:this={searchInputEl}
+					onblur={collapseSearch}
+					onkeydown={(e) => { if (e.key === 'Escape') { searchQuery = ''; searchExpanded = false } }}
+				/>
+			{:else}
+				<Button variant="ghost" size="small" iconOnly icon="search" onclick={expandSearch} />
+			{/if}
 		{/if}
 		{#each visibleFilters as filter (filter.key)}
 			<MultiSelect
@@ -496,14 +523,6 @@
 			</div>
 		{/if}
 
-		{#if showViewToggle}
-			<ViewModeToggle
-				value={viewMode}
-				onValueChange={onViewModeChange}
-				{element}
-				neutral={neutralViewToggle}
-			/>
-		{/if}
 	</div>
 </div>
 
@@ -546,7 +565,7 @@
 		font-family: var(--font-family);
 		font-size: $font-small;
 		padding: $unit-half $unit;
-		min-height: $unit-3x;
+		min-height: calc($unit * 3.5 + 2px);
 		width: 140px;
 		@include smooth-transition($duration-quick, background-color, border-color);
 
@@ -559,7 +578,7 @@
 		}
 
 		&:focus {
-			border-color: var(--accent-blue);
+			border-color: var(--accent-color, var(--accent-blue));
 		}
 	}
 

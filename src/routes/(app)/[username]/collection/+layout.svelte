@@ -7,9 +7,10 @@
 	import { setContext } from 'svelte'
 	import { createQuery } from '@tanstack/svelte-query'
 	import { sidebar } from '$lib/stores/sidebar.svelte'
+	import { viewMode } from '$lib/stores/viewMode.svelte'
 	import ProfileHeader from '$lib/components/profile/ProfileHeader.svelte'
-	import SegmentedControl from '$lib/components/ui/segmented-control/SegmentedControl.svelte'
-	import Segment from '$lib/components/ui/segmented-control/Segment.svelte'
+	import CollectionSegmentedControl from '$lib/components/collection/CollectionSegmentedControl.svelte'
+	import ViewModeToggle from '$lib/components/ui/ViewModeToggle.svelte'
 	import Button from '$lib/components/ui/Button.svelte'
 	import DropdownMenu from '$lib/components/ui/DropdownMenu.svelte'
 	import AddToCollectionModal from '$lib/components/collection/AddToCollectionModal.svelte'
@@ -225,75 +226,42 @@
 				</div>
 			{:else}
 				<!-- Normal UI -->
-				<SegmentedControl
-					value={activeEntityType}
+				<CollectionSegmentedControl
+					{activeEntityType}
 					onValueChange={handleTabChange}
-					variant="blended"
-					size="small"
 					element={userElement}
-				>
-					<Segment value="characters">
-						{m.collection_tab_characters()}
-						{#if countsQuery.data?.characters != null}
-							<span class="count">{countsQuery.data.characters}</span>
-						{/if}
-					</Segment>
-					<Segment value="weapons">
-						{m.collection_tab_weapons()}
-						{#if countsQuery.data?.weapons != null}
-							<span class="count">{countsQuery.data.weapons}</span>
-						{/if}
-					</Segment>
-					<Segment value="summons">
-						{m.collection_tab_summons()}
-						{#if countsQuery.data?.summons != null}
-							<span class="count">{countsQuery.data.summons}</span>
-						{/if}
-					</Segment>
-					<Segment value="artifacts">
-						{m.collection_tab_artifacts()}
-						{#if countsQuery.data?.artifacts != null}
-							<span class="count">{countsQuery.data.artifacts}</span>
-						{/if}
-					</Segment>
-				</SegmentedControl>
+					counts={countsQuery.data}
+				/>
 
-				{#if data.isOwner}
-					<div class="action-buttons">
-						{#if supportsAddModal}
-							<Button
-								variant="primary"
-								size="small"
-								onclick={() => (addModalOpen = true)}
-								icon="plus"
-								iconPosition="left"
-							>
-								{addButtonText}
-							</Button>
-						{:else if isArtifacts}
-							<Button
-								variant="primary"
-								size="small"
-								onclick={handleAddArtifact}
-								icon="plus"
-								iconPosition="left"
-							>
-								{m.collection_add_artifact()}
-							</Button>
-						{/if}
-
+				<div class="nav-right">
+					<ViewModeToggle
+						value={viewMode.collectionView}
+						onValueChange={(mode) => viewMode.setCollectionView(mode)}
+						element={userElement}
+					/>
+					{#if data.isOwner}
 						<DropdownMenu>
 							{#snippet trigger({ props })}
 								<Button {...props} variant="ghost" size="small" iconOnly icon="ellipsis" />
 							{/snippet}
 							{#snippet menu()}
-								<button type="button" class="dropdown-menu-item" onclick={handleEnterSelectionMode}>
-									{m.collection_select_type({ type: entityNameMap[activeEntityType] ?? activeEntityType })}
+								{#if supportsAddModal}
+									<button type="button" class="dropdown-menu-item" onclick={() => (addModalOpen = true)}>
+										{addButtonText}
+									</button>
+								{:else if isArtifacts}
+									<button type="button" class="dropdown-menu-item" onclick={handleAddArtifact}>
+										{m.collection_add_artifact()}
+									</button>
+								{/if}
+								<div class="dropdown-menu-separator"></div>
+								<button type="button" class="dropdown-menu-item danger" onclick={handleEnterSelectionMode}>
+									{m.collection_delete_type({ type: entityNameMap[activeEntityType] ?? activeEntityType })}
 								</button>
 							{/snippet}
 						</DropdownMenu>
-					</div>
-				{/if}
+					{/if}
+				</div>
 			{/if}
 		</nav>
 
@@ -359,8 +327,7 @@
 		min-height: 400px;
 	}
 
-	// Action buttons container
-	.action-buttons {
+	.nav-right {
 		display: flex;
 		align-items: center;
 		gap: $unit;
@@ -390,10 +357,4 @@
 		gap: $unit;
 	}
 
-	// Count badge in segment tabs
-	.count {
-		margin-left: $unit-half;
-		color: inherit;
-		opacity: 0.7;
-	}
 </style>

@@ -16,7 +16,7 @@
 	import Icon from '$lib/components/Icon.svelte'
 	import { sidebar } from '$lib/stores/sidebar.svelte'
 	import { collectionFilters } from '$lib/stores/collectionFilters.svelte'
-	import { viewMode, type ViewMode } from '$lib/stores/viewMode.svelte'
+	import { viewMode } from '$lib/stores/viewMode.svelte'
 	import { LOADED_IDS_KEY, type LoadedIdsContext } from '$lib/stores/selectionMode.svelte'
 	import { useInfiniteLoader } from '$lib/stores/loaderState.svelte'
 	import { localizedName } from '$lib/utils/locale'
@@ -34,7 +34,7 @@
 	// Filter state (initialized from localStorage)
 	let elementFilters = $state<number[]>(collectionFilters.characters.element)
 	let rarityFilters = $state<number[]>(collectionFilters.characters.rarity)
-	let seriesFilters = $state<number[]>(collectionFilters.characters.series)
+	let seriesFilters = $state<string[]>(collectionFilters.characters.series)
 	let raceFilters = $state<number[]>(collectionFilters.characters.race)
 	let proficiencyFilters = $state<number[]>(collectionFilters.characters.proficiency)
 	let genderFilters = $state<number[]>(collectionFilters.characters.gender)
@@ -101,7 +101,7 @@
 	function handleFiltersChange(filters: CollectionFilterState) {
 		elementFilters = filters.element
 		rarityFilters = filters.rarity
-		seriesFilters = filters.series as number[]
+		seriesFilters = filters.series as string[]
 		raceFilters = filters.race
 		proficiencyFilters = filters.proficiency
 		genderFilters = filters.gender
@@ -120,10 +120,6 @@
 		}
 		untrack(() => collectionFilters.setCharacters(filters))
 	})
-
-	function handleViewModeChange(mode: ViewMode) {
-		viewMode.setCollectionView(mode)
-	}
 
 	function openCharacterDetails(character: CollectionCharacter) {
 		const characterName = localizedName(character.character?.name)
@@ -158,9 +154,6 @@
 				proficiency: true,
 				gender: true
 			}}
-			showViewToggle={true}
-			viewMode={currentViewMode}
-			onViewModeChange={handleViewModeChange}
 			element={userElement}
 		/>
 	</div>
