@@ -68,7 +68,7 @@
 		weaponData: Weapon | undefined
 		/** Current values for all edit fields */
 		currentValues: WeaponEditValues
-		/** Grid position (-1 = mainhand). Bullets only show on mainhand guns. */
+		/** Grid position (-1 = mainhand). Bullets only available on mainhand guns. */
 		position?: number
 		/** Callback when save is clicked */
 		onSave?: (updates: WeaponEditUpdates) => void
