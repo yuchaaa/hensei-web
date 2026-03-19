@@ -8,6 +8,7 @@
 	import Tooltip from '$lib/components/ui/Tooltip.svelte'
 	import { localizeHref } from '$lib/paraglide/runtime'
 	import { localizedName } from '$lib/utils/locale'
+	import { getJobIconUrl } from '$lib/utils/jobUtils'
 	import * as m from '$lib/paraglide/messages'
 
 	interface Props {
@@ -64,13 +65,12 @@
 			</div>
 			<div class="details">
 				<div class="details-text">
+					{#if party.job}
+						<img class="job-icon" src={getJobIconUrl(party.job.granblueId)} alt="" loading="lazy" />
+					{/if}
 					<span class={`raid ${!party.raid ? 'empty' : ''}`}
 						>{party.raid ? displayName(party.raid) : m.grid_no_raid()}</span
 					>
-					{#if party.job}
-						<span class="separator">•</span>
-						<span class="job">{displayName(party.job)}</span>
-					{/if}
 				</div>
 
 				<div class="pills">
@@ -261,16 +261,11 @@
 			flex: 0 1 auto;
 			min-width: 0;
 
-			.separator {
-				color: var(--text-tertiary);
+			.job-icon {
+				width: 20px;
+				height: 20px;
+				object-fit: contain;
 				flex-shrink: 0;
-			}
-
-			.job {
-				color: var(--text-secondary);
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
 			}
 		}
 
