@@ -27,7 +27,6 @@
 	import { findNextEmptySlot, SLOT_NOT_FOUND } from '$lib/utils/gridHelpers'
 	import { toast } from 'svelte-sonner'
 	import { extractErrorMessage } from '$lib/utils/errors'
-
 	interface Props {
 		item?: GridWeapon | undefined
 		position: number
