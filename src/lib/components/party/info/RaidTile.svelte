@@ -7,6 +7,7 @@
 	import { localizedName } from '$lib/utils/locale'
 	import { sidebar } from '$lib/stores/sidebar.svelte'
 	import EditRaidPane from '$lib/components/sidebar/EditRaidPane.svelte'
+	import Button from '$lib/components/ui/Button.svelte'
 	import * as m from '$lib/paraglide/messages'
 
 	interface Props {
@@ -49,6 +50,13 @@
 </script>
 
 <InfoTile label={m.party_raid_label()} class="raid-tile" {clickable} onclick={showAdd ? openEditRaidPane : onclick} {showAdd} onAdd={openEditRaidPane}>
+	{#snippet headerAction()}
+		{#if canEdit && raid}
+			<span role="presentation" onclick={(e) => e.stopPropagation()}>
+				<Button variant="ghost" size="small" onclick={openEditRaidPane}>{m.action_edit()}</Button>
+			</span>
+		{/if}
+	{/snippet}
 	{#if raid}
 		<div class="raid-info">
 			<img src={getRaidImage(raid.slug)} alt="" class="raid-image" />
@@ -66,15 +74,24 @@
 	@use '$src/themes/spacing' as *;
 	@use '$src/themes/typography' as *;
 	@use '$src/themes/layout' as *;
+	@use '$src/themes/effects' as *;
 
 	.raid-info {
 		display: flex;
 		align-items: center;
 		gap: $unit;
+		margin: 0 (-$unit) (-$unit) (-$unit);
+		padding: $unit;
+		border-radius: $item-corner;
+		@include smooth-transition($duration-quick, background-color);
+
+		&:hover {
+			background: var(--button-bg);
+		}
 	}
 
 	.raid-image {
-		height: 95px;
+		height: 60px;
 		width: auto;
 		border-radius: $item-corner;
 	}
